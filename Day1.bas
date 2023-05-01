@@ -1,12 +1,15 @@
-Attribute VB_Name = "Module1"
 Option Explicit
 
-Sub Ç‹ÇÈÇ‹ÇÈï\()
+Const STROW = 3
+Const STCOL = 2
+
+Sub „Åæ„Çã„Åæ„ÇãË°®()
 
     Dim row As Integer
     Dim col As Integer
     Dim row_cell As Range
     Dim col_cell As Range
+    Dim rangeStr As String
     
     
     Cells().Select     'Select All Cell'
@@ -16,21 +19,23 @@ Sub Ç‹ÇÈÇ‹ÇÈï\()
     For row = 1 To 9
     
         'Insert Row Into Row 1,2,3,4'
-        Cells(row, 1) = row
+        'Cells(STROW + row, 1) = row'
         
         For col = 1 To 9
             'Insert Row*Col Into Col 2,4,6,8'
-            Cells(row, col) = row * col
+            Cells(STROW + row, STCOL + col) = row * col
             
             Next col
         
         Next row
-     Call Bracket("A1:I9")
-     Call color("A1:I9", RGB(232, 235, 107))
+     rangeStr = Chr(Asc("A") + STCOL) & STROW + 1 & ":" & Chr(Asc("I") + STCOL) & STROW + 9
+     Call Bracket(rangeStr)
+     Call color(rangeStr, RGB(232, 235, 107))
 
-    
+     rangeStr = Chr(Asc("A") + STCOL) & STROW + 11
+   
      'Move Cursor to A12'
-     Range("A12").Select
+     Range(rangeStr).Select
      
      For row = 1 To 9
          'Insert Row Into Row 1,2,3,4'
@@ -43,15 +48,16 @@ Sub Ç‹ÇÈÇ‹ÇÈï\()
             Next col
         
         Next row
-    Call Bracket("A12:I20")
-    Call color("A12:I20", RGB(112, 222, 108))
+    'A12:I20'
+    rangeStr = Chr(Asc("A") + STCOL) & STCOL + 12 & ":" & Chr(Asc("I") + STCOL) & STROW + 19
+    Call Bracket(rangeStr)
+    Call color(rangeStr, RGB(112, 222, 108))
    
 
 End Sub
 
 
 Sub Bracket(rangeStr As String)
-Attribute Bracket.VB_ProcData.VB_Invoke_Func = " \n14"
 '
 ' Bracket Macro
 '
@@ -101,7 +107,6 @@ End Sub
 
 
 Sub color(rangeStr As String, color As Long)
-Attribute color.VB_ProcData.VB_Invoke_Func = " \n14"
 '
 ' Color Macro
 '
