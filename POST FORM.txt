@@ -1,0 +1,249 @@
+Option Explicit
+
+Enum db
+    Names = 1
+    Postal_Code
+    Prefectures
+    Citys
+    Address
+    Phone_Number
+    Company_Name
+End Enum
+
+Enum zip
+    郵便番号 = 1
+    都道府県
+    市町村名
+    町域
+    番地
+    事業所名
+End Enum
+
+
+
+  
+Dim companytxt As String
+    
+
+Private Sub comBox_AfterUpdate()
+    companytxt = comBox.Value
+    
+End Sub
+
+
+
+Private Sub exitbtn_Click()
+
+    ZipBook.Close SaveChanges:=True
+    Unload Me
+
+End Sub
+
+Private Sub postalcodetxt_AfterUpdate()
+
+    Call gettingData
+    
+
+End Sub
+
+Private Sub gettingData()
+    
+    Dim findRange As Range
+    Dim findRangeCom As Range
+    Dim findRangeDum As Range
+    
+    Dim findRow As Long
+    Dim findRowCom As Long
+    Dim findRowDum As Long
+    
+    Dim Rng As Range
+    Dim FirstCompany As String
+    
+    'All Zip => get Range of Postal Code => Get Postal Code based on range'
+    Set findRange = ZipAllws.Range(findRngAll).Find(what:=postalcodetxt, lookat:=xlWhole)
+    
+    Set findRangeCom = ZipComws.Range(findRngCom).Find(what:=postalcodetxt, lookat:=xlWhole)
+    
+    Set findRangeDum = MyDBws.Range(findDumCom).Find(what:=postalcodetxt, lookat:=xlWhole)
+    
+    
+    'Clear Combo Box and Textboxs'
+    comBox.clear
+    companytxt = ""
+    
+    
+    'Searching Dummy Data'
+    If Not (findRangeDum Is Nothing) Then
+        
+        
+        findRowDum = findRangeDum.row
+        FirstCompany = MyDBws.Cells(findRowDum, db.Company_Name)
+         
+         'Searching All of the Hit Result'
+         Do Until findRangeDum Is Nothing
+            
+            'Iterating The Result'
+            Set findRangeDum = MyDBws.Range(findDumCom).FindNext(After:=findRangeDum)
+            comBox.AddItem MyDBws.Cells(findRangeDum.row, db.Company_Name)
+            
+            'If the Loop Started From First Item , Break Out of the Loop'
+            If MyDBws.Cells(findRangeDum.row, db.Company_Name) = FirstCompany Then Exit Do
+        Loop
+          
+        prefecturestxt = MyDBws.Cells(findRowDum, db.Prefectures)
+        citytxt = MyDBws.Cells(findRowDum, db.Citys)
+        addresstxt = MyDBws.Cells(findRowDum, db.Address)
+        'nametxt = MyDBws.Cells(findRowDum, db.Names)'
+        companytxt = MyDBws.Cells(findRowDum, db.Company_Name)
+        'Assign Combo box to First Item'
+        comBox.ListIndex = 0
+    End If
+    
+    If Not (findRange Is Nothing) Then
+    
+        findRow = findRange.row
+        
+        'Get Range=> Get the Column Data'
+        prefecturestxt = ZipAllws.Cells(findRow, zip.都道府県)
+        citytxt = ZipAllws.Cells(findRow, zip.市町村名)
+        addresstxt = ZipAllws.Cells(findRow, zip.町域) & ZipAllws.Cells(findRow, zip.番地)
+        
+        
+    ElseIf Not (findRangeCom Is Nothing) Then
+    
+        findRowCom = findRangeCom.row
+        FirstCompany = ZipComws.Cells(findRowCom, zip.事業所名)
+           
+        'Searching All of the Hit Result'
+        Do Until findRangeCom Is Nothing
+            
+            'Iterating The Result'
+            Set findRangeCom = ZipComws.Range(findRngCom).FindNext(After:=findRangeCom)
+            comBox.AddItem ZipComws.Cells(findRangeCom.row, zip.事業所名)
+            
+             'If the Loop Started From First Item , Break Out of the Loop'
+            If ZipComws.Cells(findRangeCom.row, zip.事業所名) = FirstCompany Then Exit Do
+        Loop
+         'Assign Combo box to First Item'
+        comBox.ListIndex = 0
+        
+       'Get Range=> Get the Column Data'
+        prefecturestxt = ZipComws.Cells(findRowCom, zip.都道府県)
+        citytxt = ZipComws.Cells(findRowCom, zip.市町村名)
+        addresstxt = ZipComws.Cells(findRowCom, zip.町域) & ZipComws.Cells(findRowCom, zip.番地)
+        
+        
+    Else
+        
+        MsgBox "Postal Code Not Found", vbCritical
+
+        
+    End If
+   
+   
+End Sub
+
+
+Private Sub registerbtn_Click()
+
+    Dim findRangeDum As Range
+    Dim findRowDum As Long
+    Dim FirstName As String
+    Dim ComName As String
+    Dim CitName As String
+    Dim row As Integer
+    Dim flag As Integer
+        
+    Set findRangeDum = MyDBws.Range(findDumCom).Find(what:=postalcodetxt, lookat:=xlWhole)
+    If Not (findRangeDum Is Nothing) Then
+  
+        FirstName = nametxt
+        ComName = companytxt
+        CitName = citytxt
+        flag = 0
+         'Searching All of the Hit Result'
+        For row = 1 To LastRow
+            
+            'Iterating The Result'
+            Set findRangeDum = MyDBws.Range(findDumCom).FindNext(After:=findRangeDum)
+             
+            'If the Loop Started From First Item , Break Out of the Loop'
+            If (MyDBws.Cells(findRangeDum.row, db.Names) = FirstName) And (MyDBws.Cells(findRangeDum.row, db.Company_Name) = ComName) And (MyDBws.Cells(findRangeDum.row, db.Citys) = CitName) Then
+                  'Same Data'
+                  flag = findRangeDum.row
+                  Exit For
+            End If
+            Next row
+          
+     
+    End If
+
+    If (flag < 1) Then
+    
+        'New Register'
+        MyDBws.Cells(LastRow, db.Names) = nametxt
+        MyDBws.Cells(LastRow, db.Postal_Code) = postalcodetxt
+        MyDBws.Cells(LastRow, db.Prefectures) = prefecturestxt
+        MyDBws.Cells(LastRow, db.Citys) = citytxt
+        MyDBws.Cells(LastRow, db.Address) = addresstxt
+        MyDBws.Cells(LastRow, db.Phone_Number) = phonetxt
+        MyDBws.Cells(LastRow, db.Company_Name) = companytxt
+    
+        'Next Line'
+        LastRow = LastRow + 1
+        MsgBox "Registered", vbInformation
+    Else
+        'If Edit '
+        If (MsgBox("Same Data Edit?", vbQuestion + vbYesNo + vbDefaultButton2, "Do you want to Edit? ")) = vbYes Then
+            
+            MyDBws.Cells(flag).ClearContents
+            MyDBws.Cells(flag, db.Names) = nametxt
+            MyDBws.Cells(flag, db.Postal_Code) = postalcodetxt
+            MyDBws.Cells(flag, db.Prefectures) = prefecturestxt
+            MyDBws.Cells(flag, db.Citys) = citytxt
+            MyDBws.Cells(flag, db.Address) = addresstxt
+            MyDBws.Cells(flag, db.Phone_Number) = phonetxt
+            MyDBws.Cells(flag, db.Company_Name) = companytxt
+            MsgBox "Registered", vbInformation
+       
+        
+        End If
+    
+        
+    
+    End If
+   
+    
+
+
+End Sub
+
+Private Sub clear()
+     
+    'Clear Form'
+    nametxt = ""
+    postalcodetxt = ""
+    prefecturestxt = ""
+    citytxt = ""
+    addresstxt = ""
+    phonetxt = ""
+    companytxt = ""
+
+End Sub
+
+
+Private Sub searchbtn_Click()
+
+    Call gettingData
+
+End Sub
+
+
+
+Private Sub UserForm_Initialize()
+    
+    prefecturestxt.Enabled = False
+    citytxt.Enabled = False
+    
+End Sub
+

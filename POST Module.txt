@@ -1,0 +1,92 @@
+Option Explicit
+
+Public LastRow As Long 'Last Row of Sheet'
+Public MyDBws As Worksheet 'Read Address Sheet'
+Public ZipBook As Workbook 'Open Postalcode Excel File'
+Public ZipAllws As Worksheet 'Open All Country's Postal Code'
+Public ZipComws As Worksheet 'Open All Company's Postal Code'
+Public ZipDumws As Worksheet 'Open All Company's Postal Code'
+
+Public findRngAll As String 'Search All Country's Postal Code'
+Public findRngCom As String 'Search All Comoany's Postal Code'
+Public findDumCom As String 'Search All Comoany's Postal Code'
+
+Dim pathList(5) As String
+Dim pathCnt As Integer
+Dim zipBookName As String
+Dim ans As VbMsgBoxResult
+
+
+'Excute From Here!!!!!!!'
+Sub Address()
+    
+    pathList(1) = ThisWorkbook.Path
+    pathList(2) = CurDir
+    pathList(3) = "D:\VBA"
+    pathList(4) = ""
+    pathList(5) = ""
+    zipBookName = "ZipCodeData.xlsx"
+    
+    'Open Address Sheet'
+    Set MyDBws = ThisWorkbook.Worksheets("Address Book")
+    
+    pathCnt = 1
+    On Error GoTo ErrorHere
+    'Open Zip Sheet'
+    Set ZipBook = Workbooks.Open(pathList(pathCnt) & "\" & zipBookName, ReadOnly:=True)
+    ZipBook.Windows(1).Visible = False
+    On Error GoTo 0
+    
+     pathList(1) = ""
+     pathList(2) = ""
+     pathList(3) = ""
+     pathList(4) = ""
+     pathList(5) = ""
+     
+    'Selecting WorkSheet'
+    Set ZipAllws = ZipBook.Worksheets("全国")
+    Set ZipComws = ZipBook.Worksheets("事業所")
+    'Set ZipDumws = ZipBook.Worksheets("Dummy")'
+    
+    ' 1=X,1=Y Getting this Value From Sheet A3:F22462' 'zipallws.range(A1)'
+    findRngAll = ZipAllws.Cells(1, 1)
+
+    
+    'Getting this Value From Sheet A3:F22462' 'zipallws.range(A1)'
+    findRngCom = ZipComws.Cells(1, 1)
+
+    
+     'Getting this Value From Sheet A3:F22462' 'zipallws.range(A1)'
+    'findDumCom = ZipDumws.Cells(1, 1)'
+
+    
+    'To Search Only Postal Code change D124557 to A124557'
+    findRngAll = Replace(findRngAll, "D", "A")
+
+    
+    'To Search Only Postal Code change F22462 to A22462'
+    findRngCom = Replace(findRngCom, "F", "A")
+
+    'To Search Only Postal Code change F22462 to A22462'
+    'findDumCom = Replace(findDumCom, "G", "D")'
+    
+    
+'Get Last Row'
+    LastRow = MyDBws.Cells(Rows.Count, 1).End(xlUp).row + 1
+    findDumCom = "B2" & ":" & "B" & LastRow
+
+    UserForm1.Show
+    
+ErrorHere:
+    pathCnt = pathCnt + 1
+    'Not equal to'
+    If pathList(pathCnt) <> "" Then
+        Resume
+    Else
+        'ans = MsgBox("File Not Found")'
+    End If
+
+
+End Sub
+
+
